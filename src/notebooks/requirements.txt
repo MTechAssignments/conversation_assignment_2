@@ -1,0 +1,10 @@
+streamlit
+sentence-transformers
+chromadb
+scikit-learn
+beautifulsoup4
+nltk
+numpy
+transformers
+nltk
+bs4
