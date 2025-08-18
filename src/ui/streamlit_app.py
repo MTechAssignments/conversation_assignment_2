@@ -1,7 +1,15 @@
+import sys
+import os
+
 import streamlit as st
 import requests
 import pandas as pd
-import infer
+
+
+# Get the path of the parent directory (conversation_assignment_2)
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../..")))
+
+from  src.model import infer
 
 
 DEFAULT_FLASK_URL = API_URL = "http://localhost:8000/rag"  # change to RAG endpoint
