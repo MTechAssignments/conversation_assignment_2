@@ -1,0 +1,7 @@
+streamlit
+requests 
+pandas
+torch
+transformers[torch] 
+
+#datasets pandas trl peft bitsandbytes
