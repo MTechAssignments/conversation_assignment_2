@@ -5,14 +5,16 @@ from transformers import AutoModelForCausalLM, AutoTokenizer, pipeline
 import torch
 
 # -------- Config --------
-MODEL_PATH = "./model/gpt2-finetuned-model"  # saved model dir
-DEFAULT_FLASK_URL = "http://localhost:5000/rag/"  # change to RAG endpoint
+#MODEL_PATH = "./model/gpt2-finetuned-model"  # local directory where model is saved
+MODEL_PATH = "Anup77Jindal/gpt2-finetuned-model"
+
+DEFAULT_FLASK_URL = API_URL = "http://localhost:8000/rag"  # change to RAG endpoint
 
 MODE_FINE_TUNE_MODEL = "Use Fine-tuned Model"
 MODE_RAG = "Use RAG"
 
 @st.cache_resource
-def load_generator():
+def load_model():
     """
     Loads the fine-tuned GPT-2 model + tokenizer and returns a
     callable `generate_answer(query, max_new_tokens)` that applies:
@@ -41,7 +43,7 @@ def load_generator():
         model=model,
         tokenizer=tokenizer,
         device=device
-    )  
+    )
 
     # --- lightweight guardrails ---
     FINANCE_KEYWORDS = {
@@ -99,7 +101,7 @@ def load_generator():
         max_length=128 + inputs.input_ids.shape[1], # Increase max_length to include prompt
         return_dict_in_generate=True,
         output_scores=True # Keep output_scores to calculate confidence
-        )
+        )        
         
         # Decode the generated answer
         generated_sequence = out.sequences[0]
@@ -188,7 +190,7 @@ if st.button("Submit"):
         elif mode == MODE_FINE_TUNE_MODEL:
              # ---- Use the fine-tuned model ----
               with st.spinner("Generating with fine-tuned model..."):
-                generate_answer = load_generator()
+                generate_answer = load_model()
                 answer = generate_answer(user_input, max_new_tokens=max_length)
                 st.subheader("Generated Answer")
                 st.info(answer)
