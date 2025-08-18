@@ -1,0 +1,10 @@
+**** RAG API***
+rag-server.py: Exposes API for RAG based question answering.
+URL:   http://localhost:5000/rag/
+Input: payload = {
+                "query": user_input, "max_length": max_length
+                 }
+
+
+******* Fine Tune Model ******
+Down load the model from huggingface.
