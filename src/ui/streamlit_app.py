@@ -41,35 +41,7 @@ def load_generator():
         model=model,
         tokenizer=tokenizer,
         device=device
-    )
-
-            '''
-        out = text_gen(
-            prompt,
-            # decode hygiene
-            max_new_tokens=max_new_tokens,
-            do_sample=True,
-            temperature=0.3,      # lower => more deterministic
-            top_p=0.9,
-            top_k=40,
-            no_repeat_ngram_size=3,
-            repetition_penalty=1.15,
-            eos_token_id=tokenizer.eos_token_id,
-            pad_token_id=tokenizer.eos_token_id,
-            num_return_sequences=1,
-            return_full_text=False
-        )
-        text = out[0]["generated_text"].strip()
-         
-        
-        # tiny post-processing: stop at a second prompt leakage if any
-        cut = text.find("\nQuestion:")
-        if cut != -1:
-            text = text[:cut].strip()
-        
-        # keep answers short + factual
-        #return text
-        '''
+    )  
 
     # --- lightweight guardrails ---
     FINANCE_KEYWORDS = {
@@ -128,8 +100,6 @@ def load_generator():
         return_dict_in_generate=True,
         output_scores=True # Keep output_scores to calculate confidence
         )
-
-
         
         # Decode the generated answer
         generated_sequence = out.sequences[0]
