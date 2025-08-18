@@ -6,7 +6,8 @@ import torch
 
 # -------- Config --------
 MODEL_PATH = "./model/gpt2-finetuned-model"  # saved model dir
-DEFAULT_FLASK_URL = "http://localhost:5000/rag/"  # change to your endpoint
+DEFAULT_FLASK_URL = "http://localhost:5000/rag/"  # change to RAG endpoint
+
 MODE_FINE_TUNE_MODEL = "Use Fine-tuned Model"
 MODE_RAG = "Use RAG"
 
@@ -41,6 +42,34 @@ def load_generator():
         tokenizer=tokenizer,
         device=device
     )
+
+            '''
+        out = text_gen(
+            prompt,
+            # decode hygiene
+            max_new_tokens=max_new_tokens,
+            do_sample=True,
+            temperature=0.3,      # lower => more deterministic
+            top_p=0.9,
+            top_k=40,
+            no_repeat_ngram_size=3,
+            repetition_penalty=1.15,
+            eos_token_id=tokenizer.eos_token_id,
+            pad_token_id=tokenizer.eos_token_id,
+            num_return_sequences=1,
+            return_full_text=False
+        )
+        text = out[0]["generated_text"].strip()
+         
+        
+        # tiny post-processing: stop at a second prompt leakage if any
+        cut = text.find("\nQuestion:")
+        if cut != -1:
+            text = text[:cut].strip()
+        
+        # keep answers short + factual
+        #return text
+        '''
 
     # --- lightweight guardrails ---
     FINANCE_KEYWORDS = {
