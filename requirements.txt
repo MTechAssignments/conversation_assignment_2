@@ -3,5 +3,8 @@ requests
 pandas
 torch
 transformers[torch] 
+fastapi
+uvicorn
 
 #datasets pandas trl peft bitsandbytes
+
