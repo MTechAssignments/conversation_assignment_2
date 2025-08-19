@@ -34,7 +34,7 @@ class Query(BaseModel):
     
 
 @app.post("/rag")
-def say_hello(payload: Query):
+def rag_query(payload: Query):
     """
     Endpoint that accepts a JSON input with a 'searchCriteria' key
     and returns a 'Hello [searchCriteria]!' message.
