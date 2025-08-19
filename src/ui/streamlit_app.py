@@ -9,7 +9,7 @@ import pandas as pd
 # Get the path of the parent directory (conversation_assignment_2)
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../..")))
 
-from  src.model import infer
+from  src.model import inference as infer
 
 
 DEFAULT_FLASK_URL = API_URL = "http://localhost:8000/rag"  # change to RAG endpoint
