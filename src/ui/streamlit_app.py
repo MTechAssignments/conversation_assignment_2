@@ -32,7 +32,7 @@ mode = st.radio(
 )
 
 
-RAG_SERVER_API_URI = "https://conv-ai-assignment-2-grp-16-rag-finetune.streamlit.app:8000/rag" 
+RAG_SERVER_API_URI = "https://conversation-assignment-2.onrender.com/rag" 
 
 # Submit
 if st.button("Submit"):
