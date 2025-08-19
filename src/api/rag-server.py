@@ -13,7 +13,9 @@ app = FastAPI(
 
 allowed_origins = [
     "http://localhost:8000",
-    "https://conv-ai-assignment-2-grp-16-rag-finetune.streamlit.app"
+    "https://conv-ai-assignment-2-grp-16-rag-finetune.streamlit.app",
+    "https://conversation-assignment-2.onrender.com"
+    "https://conversation-assignment-2.onrender.com:8000",
 ]
 
 # Add CORS middleware
