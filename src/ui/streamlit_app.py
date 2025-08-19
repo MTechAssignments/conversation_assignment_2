@@ -11,9 +11,6 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../..")
 
 from  src.model import inference as infer
 
-
-DEFAULT_FLASK_URL = API_URL = "http://localhost:8000/rag"  # change to RAG endpoint
-
 MODE_FINE_TUNE_MODEL = "Use Fine-tuned Model"
 MODE_RAG = "Use RAG"
 
@@ -34,8 +31,8 @@ mode = st.radio(
     horizontal=True
 )
 
-# Sidebar config for API mode
-flask_url = DEFAULT_FLASK_URL 
+
+RAG_SERVER_API_URI = "https://conv-ai-assignment-2-grp-16-rag-finetune.streamlit.app:8000/rag" 
 
 # Submit
 if st.button("Submit"):
@@ -52,7 +49,7 @@ if st.button("Submit"):
             }
             try:
                 with st.spinner("Calling Flask API..."):
-                    resp = requests.post(flask_url, json=payload, timeout=60)
+                    resp = requests.post(RAG_SERVER_API_URI, json=payload, timeout=60)
                 if not resp.ok:
                     st.error(f"API error {resp.status_code}: {resp.text}")
                 else:
