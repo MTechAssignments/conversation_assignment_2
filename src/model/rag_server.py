@@ -35,7 +35,7 @@ class Query(BaseModel):
 
 
 # --- RAG System Initialization (runs once at server startup) ---
-from rag_system import RAGChunkIndexer, HybridRAGRetriever, GPT2AnswerGenerator, FinancialReportProcessor
+from src.model.rag_system import RAGChunkIndexer, HybridRAGRetriever, GPT2AnswerGenerator, FinancialReportProcessor
 
 zip_file_path = './data/gehc-annual-report-2023-2024.zip'
 extracted_dir_path = './data/gehc_fin_extracted'

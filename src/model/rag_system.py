@@ -1,4 +1,4 @@
-from question_generator import FinancialReportProcessor
+from src.model.question_generator import FinancialReportProcessor
 from sentence_transformers import SentenceTransformer, CrossEncoder
 import chromadb
 from sklearn.feature_extraction.text import TfidfVectorizer
