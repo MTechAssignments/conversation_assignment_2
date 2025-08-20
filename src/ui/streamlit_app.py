@@ -5,6 +5,10 @@ import streamlit as st
 import requests
 import pandas as pd
 
+# importing necessary functions from dotenv library
+from dotenv import load_dotenv, dotenv_values  
+
+load_dotenv('config/.env') 
 
 # Get the path of the parent directory (conversation_assignment_2)
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../..")))
@@ -13,6 +17,8 @@ from  src.model import inference as infer
 
 MODE_FINE_TUNE_MODEL = "Use Fine-tuned Model"
 MODE_RAG = "Use RAG"
+
+RAG_SERVER_API_URI = f"{os.getenv("RAG_SERVER_URL", "localhost:8000")}/rag" 
 
 @st.cache_resource
 def load_model():
@@ -30,9 +36,6 @@ mode = st.radio(
     [MODE_FINE_TUNE_MODEL, MODE_RAG ],
     horizontal=True
 )
-
-
-RAG_SERVER_API_URI = "https://conversation-assignment-2.onrender.com/rag" 
 
 # Submit
 if st.button("Submit"):
