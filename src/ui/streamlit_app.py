@@ -24,6 +24,23 @@ RAG_SERVER_API_URI = f"{os.getenv("RAG_SERVER_URL", "localhost:8000")}/rag"
 def load_model():
     return infer.download_model()
 
+def create_dataframe(data):
+    if isinstance(data, list):
+        # convert List of dicts into dataframe
+        df = pd.DataFrame(data)
+    elif isinstance(data, dict):
+        # Dict of scalars/lists → try single-row frame
+        # If any value is a list of equal length, DataFrame will tabulate columns
+        # Otherwise, make it a single-row table
+        if any(isinstance(v, list) for v in data.values()):
+            df = pd.DataFrame(data)
+        else:
+            df = pd.DataFrame([data])
+    else:
+        df = pd.DataFrame([{"response": str(data)}])
+
+    return df
+
 # -------- UI --------
 st.title("Invoke RAG or Fine-tuned Model for Financial Question Answers")
 
@@ -61,33 +78,26 @@ if st.button("Submit"):
                     st.json(data)
 
                     # ---- Show as table when possible ----
-                    st.subheader("API Response:")
-                    # Try to coerce JSON to a DataFrame sensibly
+                    st.subheader("RAG Response:")
                     try:
-                        if isinstance(data, list):
-                            # List of dicts → table directly
-                            df = pd.DataFrame(data)
-                        elif isinstance(data, dict):
-                            # Dict of scalars/lists → try single-row frame
-                            # If any value is a list of equal length, DataFrame will tabulate columns
-                            # Otherwise, make it a single-row table
-                            if any(isinstance(v, list) for v in data.values()):
-                                df = pd.DataFrame(data)
-                            else:
-                                df = pd.DataFrame([data])
-                        else:
-                            df = pd.DataFrame([{"response": str(data)}])
+                        df = create_dataframe(data) 
                         st.dataframe(df, use_container_width=True)
                     except Exception as e:
-                        st.info("Could not tabulate the response; showing JSON above.")
-                        st.caption(f"(Table error: {e})")
+                        st.info("Failed to render the response as table; showing JSON as-is.")
+                        st.json(data)
             except requests.exceptions.RequestException as e:
                 st.error(f"Failed to reach Flask API: {e}")
 
         elif mode == MODE_FINE_TUNE_MODEL:
              # ---- Use the fine-tuned model ----
               with st.spinner("Generating with fine-tuned model..."):
-                generate_answer = load_model()
-                answer = generate_answer(user_input, max_new_tokens=max_length)
-                st.subheader("Generated Answer")
-                st.info(answer)
+                try:
+                    generate_answer = load_model()
+                    data = generate_answer(user_input, max_new_tokens=max_length)
+                    st.subheader("Finetuned Response:")
+                    
+                    df = create_dataframe(data) 
+                    st.dataframe(df, use_container_width=True)
+                    st.info(data)
+                except Exception as e:
+                    st.error(f"Failed to generate response: {e}")

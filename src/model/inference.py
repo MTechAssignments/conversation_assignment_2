@@ -1,7 +1,7 @@
 
 from transformers import AutoModelForCausalLM, AutoTokenizer, pipeline
 import torch
-
+import time
 
 # -------- Config --------
 #MODEL_PATH = "./model/gpt2-finetuned-model"  # local directory where model is saved
@@ -87,18 +87,20 @@ def download_model():
             # keep behavior consistent with RAG’s safety posture
             return "I don't know based on my data."
 
+        start_time = time.time()
         prompt = build_prompt(q)
         inputs = tokenizer(prompt, return_tensors="pt", truncation=True, max_length=max_new_tokens).to(model.device)
 
-        out = model.generate(
+        outputs = model.generate(
         **inputs,
         max_length=128 + inputs.input_ids.shape[1], # Increase max_length to include prompt
         return_dict_in_generate=True,
         output_scores=True # Keep output_scores to calculate confidence
         )        
-        
+        inference_time = time.time() - start_time
+
         # Decode the generated answer
-        generated_sequence = out.sequences[0]
+        generated_sequence = outputs.sequences[0]
         #print(f"generated_sequence: {generated_sequence}\n\n")
         
         # Get the length of the input prompt's token IDs
@@ -109,8 +111,27 @@ def download_model():
         #print(f"answer_ids: {answer_ids}\n\n") 
         
         decoded_answer = tokenizer.decode(answer_ids, skip_special_tokens=True).strip()
-        return decoded_answer
+
+        # Calculate confidence score from the transition scores of the generated tokens
+        # We calculate the average probability of the generated tokens
+        # The scores are the logits of the next token predicted
+        transition_scores = model.compute_transition_scores(outputs.sequences, outputs.scores, normalize_logits=True)
+        # Calculate the average log probability across generated tokens
+        avg_log_prob = transition_scores.mean().item()
+        # Exponentiate the average log probability to get a probability-like score
+        confidence = torch.exp(torch.tensor(avg_log_prob)).item()
+
+        data = {
+        "Question": query,
+        "Method": "Fine-Tune",
+        "Answer": decoded_answer,
+        "Confidence": f"{confidence:.4f}",
+        "Time (s)": f"{inference_time:.2f}"
+        }
+
+        return data
         
 
     # return the callable so all calls share same guardrails/params
     return generate_answer
+
