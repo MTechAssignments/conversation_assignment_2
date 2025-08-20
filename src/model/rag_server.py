@@ -65,6 +65,15 @@ retriever = HybridRAGRetriever(
 retriever.load_cross_encoder()
 answer_generator = GPT2AnswerGenerator()
 
+def invoke_rag(user_query, max_length=512):
+    response = retriever.get_user_response(user_query, answer_generator)
+    data = {
+        "Question": user_query,
+        "Answer": response["answer"],
+        "Chunks": response["chunks"]
+        }
+    return data
+
 # --- API Endpoint ---
 @app.post("/rag")
 def rag_query(payload: Query):
@@ -72,11 +81,9 @@ def rag_query(payload: Query):
     Accepts a user query and returns the RAG-generated answer and supporting chunks.
     """
     user_query = payload.query
-    response = retriever.get_user_response(user_query, answer_generator)
-    return {
-        "answer": response["answer"],
-        "chunks": response["chunks"]
-    }
+    data = invoke_rag(payload.query, payload.max_length)
+    
+    return data
 
 @app.get("/health")
 def health_check():
