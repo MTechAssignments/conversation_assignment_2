@@ -78,6 +78,12 @@ def rag_query(payload: Query):
         "chunks": response["chunks"]
     }
 
+@app.get("/health")
+def health_check():
+    """Health check endpoint."""
+    return {"status": "ok", "message": "API Server is healthy!"}
+    
+
 if __name__ == '__main__':
     uvicorn.run(app, host="0.0.0.0", port=8000)
 
