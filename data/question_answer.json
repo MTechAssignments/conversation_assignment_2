@@ -1,0 +1,562 @@
+[
+  {
+    "question": "What is the full name of the company?",
+    "answer": "GE HealthCare Technologies Inc."
+  },
+  {
+    "question": "Where are GE HealthCare's corporate headquarters located?",
+    "answer": "The corporate headquarters are in Chicago, Illinois."
+  },
+  {
+    "question": "What is the company's mission?",
+    "answer": "To create a world where healthcare has no limits."
+  },
+  {
+    "question": "What is the company's business?",
+    "answer": "GE HealthCare is a global medical technology, pharmaceutical diagnostics, and digital solutions innovator."
+  },
+  {
+    "question": "How many colleagues does GE HealthCare have?",
+    "answer": "Approximately 53,000 colleagues as of the fiscal year ended December 31, 2024. In the previous year, they had approximately 51,000 colleagues."
+  },
+  {
+    "question": "How many countries does GE HealthCare serve?",
+    "answer": "The company serves customers in over 160 countries."
+  },
+  {
+    "question": "What are the company's four business segments?",
+    "answer": "The four business segments are Imaging, Advanced Visualization Solutions (AVS), Patient Care Solutions (PCS), and Pharmaceutical Diagnostics (PDx). Prior to July 1, 2024, the Ultrasound segment was separate from Imaging."
+  },
+  {
+    "question": "What is GE HealthCare's stock ticker symbol and on what exchange is it traded?",
+    "answer": "The company's common stock is traded on The Nasdaq Stock Market LLC (\"Nasdaq\") under the symbol \"GEHC.\""
+  },
+  {
+    "question": "When did \"regular way\" trading for GE HealthCare's common stock begin?",
+    "answer": "\"Regular way\" trading began on January 4, 2023."
+  },
+  {
+    "question": "How many manufacturing facilities does GE HealthCare have?",
+    "answer": "The company has 43 manufacturing facilities across 17 countries, of which 30 are owned."
+  },
+  {
+    "question": "What types of products are included in the Imaging portfolio?",
+    "answer": "The Imaging portfolio includes Molecular Imaging, Computed Tomography, Magnetic Resonance, Women’s Health, and X-ray."
+  },
+  {
+    "question": "What does Molecular Imaging enable?",
+    "answer": "It enables the visualization, characterization, and quantification of functional processes at the cellular and subcellular levels within patients."
+  },
+  {
+    "question": "What is the purpose of Computed Tomography (CT) scans?",
+    "answer": "CT scans produce 3D anatomical images of structures and are used for various applications, including detecting tumors, blocked blood vessels, and fractures."
+  },
+  {
+    "question": "What types of systems are included in the X-ray product portfolio?",
+    "answer": "The portfolio includes fixed room radiography, mobile radiography, and fluoroscopy products."
+  },
+  {
+    "question": "What is the key purpose of the Advanced Visualization Solutions (AVS) segment?",
+    "answer": "The AVS segment provides ultrasound, image-guided therapies, and interventional solutions to help clinicians with screening, diagnosis, treatment, and monitoring of diseases."
+  },
+  {
+    "question": "What two core areas does the AVS segment serve?",
+    "answer": "The two core areas are Specialized Ultrasound and Procedural Guidance."
+  },
+  {
+    "question": "What is the primary function of the Patient Care Solutions (PCS) segment?",
+    "answer": "The PCS segment provides medical devices, consumables, services, and digital solutions to help clinicians with real-time visualization and clinical decision support."
+  },
+  {
+    "question": "What are the two main portfolios of the PCS segment?",
+    "answer": "The portfolios are Monitoring Solutions and Life Support Solutions."
+  },
+  {
+    "question": "What products are in the Monitoring Solutions portfolio?",
+    "answer": "This portfolio includes patient monitors, diagnostic cardiology solutions, consumables, and digital solutions."
+  },
+  {
+    "question": "What is the purpose of the Pharmaceutical Diagnostics (PDx) segment?",
+    "answer": "PDx supplies diagnostic imaging agents to the global radiology and nuclear medicine industries to help clinicians with more precise diagnoses and therapy selection."
+  },
+  {
+    "question": "What are the two types of imaging agents produced by the PDx business?",
+    "answer": "The two types are contrast media and radiopharmaceuticals."
+  },
+  {
+    "question": "What are contrast media used for?",
+    "answer": "Contrast media are pharmaceuticals administered to a patient to increase the visibility of tissues or structures during imaging exams."
+  },
+  {
+    "question": "What are radiopharmaceuticals used for?",
+    "answer": "Radiopharmaceuticals are molecular tracers injected into a patient before a scan to visualize and assess cell function, aiding in diagnosis and therapy selection."
+  },
+  {
+    "question": "How many sales professionals does the company have?",
+    "answer": "Approximately 9,800 sales professionals as of the year ended December 31, 2024."
+  },
+  {
+    "question": "How many field service engineers does the company have?",
+    "answer": "Approximately 8,300 field service engineers as of the year ended December 31, 2024."
+  },
+  {
+    "question": "What were the total revenues for the year ended December 31, 2024?",
+    "answer": "$19,672 million."
+  },
+  {
+    "question": "What were the total revenues for the year ended December 31, 2023?",
+    "answer": "$19,552 million."
+  },
+  {
+    "question": "What was the total revenue growth rate from 2023 to 2024?",
+    "answer": "1%"
+  },
+  {
+    "question": "What were the sales of products for the year ended December 31, 2024?",
+    "answer": "$13,075 million."
+  },
+  {
+    "question": "What were the sales of services for the year ended December 31, 2024?",
+    "answer": "$6,597 million."
+  },
+  {
+    "question": "What was the gross profit for the year ended December 31, 2024?",
+    "answer": "$8,205 million."
+  },
+  {
+    "question": "What was the total operating expenses for the year ended December 31, 2024?",
+    "answer": "$5,580 million."
+  },
+  {
+    "question": "What was the operating income for the year ended December 31, 2024?",
+    "answer": "$2,625 million."
+  },
+  {
+    "question": "What was the net income attributable to GE HealthCare common stockholders for the year ended December 31, 2024?",
+    "answer": "$1,993 million."
+  },
+  {
+    "question": "What was the basic earnings per share from continuing operations for the year ended December 31, 2024?",
+    "answer": "$4.37 per share."
+  },
+  {
+    "question": "What was the diluted earnings per share from continuing operations for the year ended December 31, 2024?",
+    "answer": "$4.34 per share."
+  },
+  {
+    "question": "What were the capital expenditures for the year ended December 31, 2024?",
+    "answer": "$371 million."
+  },
+  {
+    "question": "How much did the company spend on research and development in 2024?",
+    "answer": "$1,311 million."
+  },
+  {
+    "question": "What was the total debt as of December 31, 2024?",
+    "answer": "$8,951 million."
+  },
+  {
+    "question": "How does the Imaging segment's revenue for 2024 compare to 2023?",
+    "answer": "The Imaging segment's total revenue decreased by 1%."
+  },
+  {
+    "question": "How does the Advanced Visualization Solutions (AVS) segment's revenue for 2024 compare to 2023?",
+    "answer": "The AVS segment's total revenue increased by 1%."
+  },
+  {
+    "question": "How does the Patient Care Solutions (PCS) segment's revenue for 2024 compare to 2023?",
+    "answer": "The PCS segment's total revenue decreased by 1%."
+  },
+  {
+    "question": "How does the Pharmaceutical Diagnostics (PDx) segment's revenue for 2024 compare to 2023?",
+    "answer": "The PDx segment's total revenue increased by 9%."
+  },
+  {
+    "question": "What was the total revenue recognized from contract liabilities at the beginning of 2024?",
+    "answer": "Approximately $1,585 million."
+  },
+  {
+    "question": "What were the total revenues for the year ended December 31, 2023?",
+    "answer": "$19,552 million."
+  },
+  {
+    "question": "What were the total revenues for the year ended December 31, 2022?",
+    "answer": "$18,341 million."
+  },
+  {
+    "question": "What was the gross profit for the year ended December 31, 2023?",
+    "answer": "$7,922 million."
+  },
+  {
+    "question": "What was the operating income for the year ended December 31, 2023?",
+    "answer": "$2,435 million."
+  },
+  {
+    "question": "What was the net income attributable to GE HealthCare for the year ended December 31, 2023?",
+    "answer": "$1,568 million."
+  },
+  {
+    "question": "What were the sales of products and services for the year ended December 31, 2023?",
+    "answer": "Sales of products were $13,127 million and sales of services were $6,425 million."
+  },
+  {
+    "question": "What was the total amount spent on research and development in 2023?",
+    "answer": "$1,205 million."
+  },
+  {
+    "question": "What was the total debt as of December 31, 2023?",
+    "answer": "$9,442 million."
+  },
+  {
+    "question": "How much cash was generated from operating activities in 2023?",
+    "answer": "$2,101 million."
+  },
+  {
+    "question": "What was the free cash flow for the year ended December 31, 2023?",
+    "answer": "$1,715 million."
+  },
+  {
+    "question": "How does the Imaging segment's revenue for 2023 compare to 2022?",
+    "answer": "The Imaging segment's total revenue increased by 7%."
+  },
+  {
+    "question": "How does the Ultrasound segment's revenue for 2023 compare to 2022?",
+    "answer": "The Ultrasound segment's total revenue increased by 2%."
+  },
+  {
+    "question": "How does the Patient Care Solutions (PCS) segment's revenue for 2023 compare to 2022?",
+    "answer": "The PCS segment's total revenue increased by 8%."
+  },
+  {
+    "question": "How does the Pharmaceutical Diagnostics (PDx) segment's revenue for 2023 compare to 2022?",
+    "answer": "The PDx segment's total revenue increased by 18%."
+  },
+  {
+    "question": "What was the total revenue recognized from contract liabilities at the beginning of 2023?",
+    "answer": "Approximately $1,554 million."
+  },
+  {
+    "question": "What was the total value of intangible assets as of December 31, 2023?",
+    "answer": "$1,178 million."
+  },
+  {
+    "question": "Who is the President and CEO of GE HealthCare?",
+    "answer": "Peter J. Arduini."
+  },
+  {
+    "question": "What is the age of Peter J. Arduini as of the end of fiscal year 2024?",
+    "answer": "He is 60 years old."
+  },
+  {
+    "question": "When was Peter J. Arduini appointed as President and CEO?",
+    "answer": "He was appointed in connection with the Spin-Off from GE in January 2023."
+  },
+  {
+    "question": "Who is the Chief Financial Officer?",
+    "answer": "James K. Saccaro."
+  },
+  {
+    "question": "When did James K. Saccaro become the CFO?",
+    "answer": "He has served as the Vice President and Chief Financial Officer since June 2023."
+  },
+  {
+    "question": "Who is the General Counsel and Corporate Secretary?",
+    "answer": "Frank R. Jimenez."
+  },
+  {
+    "question": "Who is the Chief Science and Technology Officer?",
+    "answer": "Dr. Taha Kass-Hout."
+  },
+  {
+    "question": "Who is the President and CEO of the Imaging segment?",
+    "answer": "Roland Rott."
+  },
+  {
+    "question": "Who is the President and CEO of the Advanced Visualization Solutions segment?",
+    "answer": "Philip Rackliffe, appointed in July 2024."
+  },
+  {
+    "question": "Who is the President and CEO of the Patient Care Solutions segment?",
+    "answer": "Thomas J. Westrick."
+  },
+  {
+    "question": "Who is the President and CEO of the Pharmaceutical Diagnostics segment?",
+    "answer": "Kevin M. O’Neill."
+  },
+  {
+    "question": "What is the purpose of \"The Spirit & The Letter\"?",
+    "answer": "It is GE HealthCare's code of conduct and qualifies as a code of ethics."
+  },
+  {
+    "question": "Where can a shareholder get a copy of the Governance Principles?",
+    "answer": "They are available on the company's website or can be requested in writing from the Corporate Secretary."
+  },
+  {
+    "question": "What committee of the board oversees cybersecurity-related risks?",
+    "answer": "The Audit Committee of the Board of Directors."
+  },
+  {
+    "question": "What is the age of James K. Saccaro as of the end of fiscal year 2024?",
+    "answer": "He is 52 years old."
+  },
+  {
+    "question": "What is the age of Roland Rott as of the end of fiscal year 2024?",
+    "answer": "He is 53 years old."
+  },
+  {
+    "question": "What is the age of Philip Rackliffe as of the end of fiscal year 2024?",
+    "answer": "He is 51 years old."
+  },
+  {
+    "question": "What is the age of Thomas J. Westrick as of the end of fiscal year 2024?",
+    "answer": "He is 56 years old."
+  },
+  {
+    "question": "What are the two core areas of the Imaging portfolio that are managed together?",
+    "answer": "Molecular Imaging and Computed Tomography."
+  },
+  {
+    "question": "What is a \"revolving credit facility\"?",
+    "answer": "A revolving credit facility is a type of credit facility that allows a borrower to draw, repay, and redraw funds up to a certain limit for a specified period of time. GE HealthCare has a five-year and a 364-day senior unsecured revolving facility."
+  },
+  {
+    "question": "What was the total amount of outstanding common stock as of February 6, 2025?",
+    "answer": "457,298,310 shares."
+  },
+  {
+    "question": "What was the aggregate market value of common stock held by non-affiliates as of June 28, 2024?",
+    "answer": "Approximately $33 billion."
+  },
+  {
+    "question": "What are the main causes of increases in pension obligations?",
+    "answer": "Increases can be caused by changes in actuarial assumptions such as discount rates, and low returns on plan assets."
+  },
+  {
+    "question": "What is a risk related to the company's dependency on third-party partners?",
+    "answer": "The company cannot guarantee that third-party partners will comply with their quality standards or legal and regulatory requirements, which could lead to commercial, financial, or reputational harm."
+  },
+  {
+    "question": "What are some of the key competitive factors in the medical technology industry?",
+    "answer": "Key factors include cost effectiveness, price, service, product performance, technological innovation, and brand reputation."
+  },
+  {
+    "question": "What is one of the risks associated with the company's reliance on a global supply chain?",
+    "answer": "Supply chain interruptions or price increases in key countries could restrict manufacturing, delay delivery, or significantly increase costs."
+  },
+  {
+    "question": "What are the potential consequences of a cybersecurity breach?",
+    "answer": "Consequences could include loss of data, disruption of operations, recalls, regulatory actions, fines, litigation, and reputational harm."
+  },
+  {
+    "question": "What is a specific risk related to the company's use of AI and software offerings?",
+    "answer": "The use of AI may lead to risks such as flawed algorithms, biased datasets, or a failure to deliver positive outcomes, which could result in legal liability and reputational harm."
+  },
+  {
+    "question": "What are the potential consequences of a failure to comply with the Foreign Corrupt Practices Act (FCPA)?",
+    "answer": "Violations can result in government scrutiny, civil or criminal sanctions, fines, and reputational damage."
+  },
+  {
+    "question": "What is the significance of China's anti-corruption campaign for GE HealthCare?",
+    "answer": "The campaign has contributed to delayed orders and sales in the company's China business."
+  },
+  {
+    "question": "What is the risk associated with changes to government reimbursement policies?",
+    "answer": "Changes could lead to lower reimbursements, reduced demand for products, and customer cancellations, negatively impacting financial performance."
+  },
+  {
+    "question": "What is a risk related to the company's intellectual property (IP)?",
+    "answer": "The company may be unable to obtain, maintain, protect, or effectively enforce its IP rights, which could allow competitors to gain an advantage."
+  },
+  {
+    "question": "What could happen if GE HealthCare's trademark license with GE is terminated?",
+    "answer": "The company would need to undergo significant rebranding efforts, which could be costly and affect its ability to attract and retain customers."
+  },
+  {
+    "question": "What is a \"non-GAAP financial measure\"?",
+    "answer": "Supplemental measures of performance that help investors understand financial condition, cash flows, and operating results, and are used by management for decision-making."
+  },
+  {
+    "question": "What non-GAAP measures does management review?",
+    "answer": "Management reviews Organic revenue, Adjusted EBIT, Adjusted net income, Adjusted tax expense, Adjusted effective tax rate, Adjusted earnings per share, and Free cash flow."
+  },
+  {
+    "question": "What does \"Free cash flow\" represent?",
+    "answer": "It is a measure of the company's ability to generate cash on a normalized basis, providing insight into its flexibility to allocate capital."
+  },
+  {
+    "question": "What is one of the main factors impacting cash generated from operating activities?",
+    "answer": "In 2023, cash from operating activities was impacted by non-cash charges for depreciation and amortization, and a cash outflow from changes in assets and liabilities."
+  },
+  {
+    "question": "What was the company's long-term credit rating from Moody's as of December 31, 2024?",
+    "answer": "Baa2."
+  },
+  {
+    "question": "What were the capital expenditures primarily used for in 2024?",
+    "answer": "They were primarily for manufacturing capacity expansion, and equipment and tooling for new and existing products."
+  },
+  {
+    "question": "What is the risk related to GE HealthCare's significant postretirement benefit liabilities?",
+    "answer": "The actual costs and cash flows of these obligations are uncertain and could exceed current estimates, potentially affecting earnings, cash flows, and financial condition."
+  },
+  {
+    "question": "What is the age of Peter J. Arduini as of the end of fiscal year 2023?",
+    "answer": "He is 59 years old."
+  },
+  {
+    "question": "What were the total operating expenses for the year ended December 31, 2023?",
+    "answer": "$5,487 million."
+  },
+  {
+    "question": "What was the total assets as of December 31, 2023?",
+    "answer": "$43,184 million."
+  },
+  {
+    "question": "What was the total assets as of December 31, 2024?",
+    "answer": "$43,622 million."
+  },
+  {
+    "question": "What was the total number of common shares outstanding as of December 31, 2023?",
+    "answer": "456,368,367 shares."
+  },
+  {
+    "question": "What was the total number of common shares outstanding as of December 31, 2024?",
+    "answer": "456,876,432 shares."
+  },
+  {
+    "question": "What was the amount of goodwill as of December 31, 2023?",
+    "answer": "$11,269 million."
+  },
+  {
+    "question": "What was the amount of goodwill as of December 31, 2024?",
+    "answer": "$11,269 million."
+  },
+  {
+    "question": "What was the company's total stockholder's equity as of December 31, 2023?",
+    "answer": "$15,283 million."
+  },
+  {
+    "question": "What was the company's total stockholder's equity as of December 31, 2024?",
+    "answer": "$16,560 million."
+  },
+  {
+    "question": "What was the cost of revenues for the year ended December 31, 2023?",
+    "answer": "$11,630 million."
+  },
+  {
+    "question": "What was the cost of revenues for the year ended December 31, 2024?",
+    "answer": "$11,467 million."
+  },
+  {
+    "question": "What was the total cash and cash equivalents as of December 31, 2023?",
+    "answer": "$1,388 million."
+  },
+  {
+    "question": "What was the total cash and cash equivalents as of December 31, 2024?",
+    "answer": "$1,489 million."
+  },
+  {
+    "question": "What was the interest expense for the year ended December 31, 2023?",
+    "answer": "$189 million."
+  },
+  {
+    "question": "What was the interest expense for the year ended December 31, 2024?",
+    "answer": "$195 million."
+  },
+  {
+    "question": "What was the effective tax rate for the year ended December 31, 2023?",
+    "answer": "21.6%."
+  },
+  {
+    "question": "What was the effective tax rate for the year ended December 31, 2024?",
+    "answer": "22.2%."
+  },
+  {
+    "question": "What was the total amount of dividends declared per share for the year ended December 31, 2023?",
+    "answer": "$0.03."
+  },
+  {
+    "question": "What was the total amount of dividends declared per share for the year ended December 31, 2024?",
+    "answer": "$0.08."
+  },
+  {
+    "question": "What was the net change in cash from investing activities for the year ended December 31, 2023?",
+    "answer": "-$383 million."
+  },
+  {
+    "question": "What was the net change in cash from investing activities for the year ended December 31, 2024?",
+    "answer": "-$221 million."
+  },
+  {
+    "question": "What was the total amount of accounts receivable, net, as of December 31, 2023?",
+    "answer": "$4,717 million."
+  },
+  {
+    "question": "What was the total amount of accounts receivable, net, as of December 31, 2024?",
+    "answer": "$4,795 million."
+  },
+  {
+    "question": "What was the total amount of inventories, net, as of December 31, 2023?",
+    "answer": "$3,248 million."
+  },
+  {
+    "question": "What was the total amount of inventories, net, as of December 31, 2024?",
+    "answer": "$3,212 million."
+  },
+  {
+    "question": "What was the total amount of accrued expenses as of December 31, 2023?",
+    "answer": "$3,052 million."
+  },
+  {
+    "question": "What was the total amount of accrued expenses as of December 31, 2024?",
+    "answer": "$3,061 million."
+  },
+  {
+    "question": "What was the total amount of property, plant and equipment, net, as of December 31, 2023?",
+    "answer": "$2,298 million."
+  },
+  {
+    "question": "What was the total amount of property, plant and equipment, net, as of December 31, 2024?",
+    "answer": "$2,354 million."
+  },
+  {
+    "question": "What was the total amount of long-term debt as of December 31, 2023?",
+    "answer": "$9,219 million."
+  },
+  {
+    "question": "What was the total amount of long-term debt as of December 31, 2024?",
+    "answer": "$8,705 million."
+  },
+  {
+    "question": "What was the total amount of deferred income tax assets as of December 31, 2023?",
+    "answer": "$1,098 million."
+  },
+  {
+    "question": "What was the total amount of deferred income tax assets as of December 31, 2024?",
+    "answer": "$1,053 million."
+  },
+  {
+    "question": "What was the total amount of accounts payable as of December 31, 2023?",
+    "answer": "$2,501 million."
+  },
+  {
+    "question": "What was the total amount of accounts payable as of December 31, 2024?",
+    "answer": "$2,648 million."
+  },
+  {
+    "question": "What was the total amount of revenue from sales of products for the year ended December 31, 2023?",
+    "answer": "$13,127 million."
+  },
+  {
+    "question": "What was the total amount of revenue from sales of services for the year ended December 31, 2023?",
+    "answer": "$6,425 million."
+  },
+  {
+    "question": "What was the total amount of revenue from sales of products for the year ended December 31, 2024?",
+    "answer": "$13,075 million."
+  },
+  {
+    "question": "What was the total amount of revenue from sales of services for the year ended December 31, 2024?",
+    "answer": "$6,597 million."
+  }
+]
