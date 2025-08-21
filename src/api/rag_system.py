@@ -163,17 +163,6 @@ class RAGChunkIndexer:
 """
 
 class HybridRAGRetriever:
-    def get_user_response(self, user_query, answer_generator, n_broad_dense=10, n_broad_sparse=10, k=3):
-        """
-        Retrieve top-k relevant chunks for the user query and generate an answer.
-        Does NOT regenerate questions/answers or rebuild indexes.
-        """
-        top_k_chunks = self.retrieve(user_query, n_broad_dense, n_broad_sparse, k)
-        answer = answer_generator.generate_answer(top_k_chunks, user_query)
-        return {
-            "answer": answer,
-            "chunks": top_k_chunks
-        }
     """
     Implements a hybrid retrieval pipeline for RAG using dense, sparse, and cross-encoder reranking.
     """
@@ -313,7 +302,7 @@ class HybridRAGRetriever:
             print(f"- ID: {chunk['id']}, Content: {chunk['content'][:150]}...")
         return top_k_chunks
 
-    def retrieve(self, user_query, n_broad_dense=10, n_broad_sparse=10, k=3):
+    def retrieve(self, user_query, n_broad_dense=10, n_broad_sparse=10, k=3, return_reranked=False):
         # Preprocess the query
         preprocessed_query = self.preprocess_query(user_query)
         # Broad retrieval
@@ -323,9 +312,42 @@ class HybridRAGRetriever:
         combined_results = self.combine_retrieval_results(broad_dense_results, broad_sparse_results)
         # Rerank
         reranked_results = self.rerank(preprocessed_query, combined_results)
+        
+        if return_reranked:
+            return reranked_results
+            
         # Select top-k
         top_k_chunks = self.select_top_k_chunks(reranked_results, k=k)
         return top_k_chunks
+
+    def get_user_response(self, user_query, answer_generator, n_broad_dense=5, n_broad_sparse=5, k=2, max_length=150):
+        """
+        Retrieve top-k relevant chunks for the user query and generate an answer.
+        Returns answer in the requested format with confidence, method, and inference time.
+        """
+        import time
+        start_time = time.time()
+
+        # Retrieve and rerank chunks
+        reranked_results = self.retrieve(user_query, n_broad_dense, n_broad_sparse, k, return_reranked=True)
+        top_k_chunks = self.select_top_k_chunks(reranked_results, k=k)
+        
+        # Generate answer
+        decoded_answer = answer_generator.generate_answer(top_k_chunks, user_query, max_length=max_length)
+        inference_time = time.time() - start_time
+
+        # Calculate confidence from the top reranked score
+        confidence = float(reranked_results[0]['score']) if reranked_results else 0.0
+        
+        data = {
+            "Question": user_query,
+            "Method": "RAG",
+            "Answer": decoded_answer,
+            "Confidence": f"{confidence:.4f}",
+            "Time (s)": f"{inference_time:.2f}",
+            "ContextSnippet": top_k_chunks[0]['content'][:200] if top_k_chunks else "No context found."
+        }
+        return data
 
 # Step 5: Generate Answer using a small generative model (GPT-2 Small)
 # Install transformers library if not already installed
@@ -351,7 +373,7 @@ class GPT2AnswerGenerator:
             self.tokenizer = None
             self.model = None
 
-    def generate_answer(self, top_k_chunks, user_query):
+    def generate_answer(self, top_k_chunks, user_query, max_length=150):
         """
         Generate an answer using GPT-2 given the top retrieved chunks and user query.
         Returns the generated answer as a string, or None if generation fails.
@@ -359,14 +381,17 @@ class GPT2AnswerGenerator:
         if self.tokenizer is not None and self.model is not None and top_k_chunks:
             context = "\n".join([chunk['content'] for chunk in top_k_chunks])
             prompt = f"Context:\n{context}\n\nQuestion: {user_query}\n\nAnswer:"
-            max_model_input_length = self.tokenizer.model_max_length
-            max_prompt_length = max_model_input_length - 50
+            
+            # Ensure max_length for the answer doesn't exceed model's capacity
+            max_prompt_length = self.tokenizer.model_max_length - max_length
+            
             encoded_prompt = self.tokenizer.encode(prompt, max_length=max_prompt_length, truncation=True, return_tensors="pt")
+            
             try:
                 print("\nGenerating answer...")
                 output_sequences = self.model.generate(
                     encoded_prompt,
-                    max_length=max_model_input_length,
+                    max_length=len(encoded_prompt[0]) + max_length, # Generate up to max_length new tokens
                     num_return_sequences=1,
                     no_repeat_ngram_size=2,
                     early_stopping=True,

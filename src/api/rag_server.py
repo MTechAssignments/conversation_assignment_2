@@ -35,7 +35,7 @@ class Query(BaseModel):
 
 
 # --- RAG System Initialization (runs once at server startup) ---
-from src.model.rag_system import RAGChunkIndexer, HybridRAGRetriever, GPT2AnswerGenerator, FinancialReportProcessor
+from src.api.rag_system import RAGChunkIndexer, HybridRAGRetriever, GPT2AnswerGenerator, FinancialReportProcessor
 
 zip_file_path = './data/gehc-annual-report-2023-2024.zip'
 extracted_dir_path = './data/gehc_fin_extracted'
@@ -65,13 +65,21 @@ retriever = HybridRAGRetriever(
 retriever.load_cross_encoder()
 answer_generator = GPT2AnswerGenerator()
 
+
+# RAG pipeline objects are initialized ONCE above, at server startup.
 def invoke_rag(user_query, max_length=512):
+    # Only use already-initialized retriever and answer_generator
     response = retriever.get_user_response(user_query, answer_generator)
+    # Only include the answer and metadata
     data = {
-        "Question": user_query,
-        "Answer": response["answer"],
-        "Chunks": response["chunks"]
-        }
+        "Question": response["Question"],
+        "Method": response["Method"],
+        "Answer": response["Answer"],
+        "Confidence": response["Confidence"],
+        "Time (s)": response["Time (s)"]
+    }
+    if response.get("Chunks"):
+        data["ContextSnippet"] = response["Chunks"][0]["content"][:100]
     return data
 
 # --- API Endpoint ---
