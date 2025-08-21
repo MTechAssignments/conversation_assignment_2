@@ -17,7 +17,7 @@ load_dotenv('config/.env')
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../..")))
 
 from  src.model import inference as infer
-from src.model import rag_server as rags
+from src.api import rag_server as rags
 
 MODE_FINE_TUNE_MODEL = "Use Fine-tuned Model"
 MODE_RAG = "Use RAG"
