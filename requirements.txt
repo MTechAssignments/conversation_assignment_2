@@ -15,6 +15,6 @@ transformers[torch]
 fastapi
 uvicorn
 python-dotenv
-
+ipywidgets
 #datasets pandas trl peft bitsandbytes
 

@@ -11,3 +11,5 @@ data/content/*
 src/__pycache__/*
 src/api/__pycache__/*
 src/notebooks/results_sft/*
+src/notebooks/gehc_fin_plain_text/*
+model/*
