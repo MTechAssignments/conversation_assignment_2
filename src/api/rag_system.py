@@ -194,18 +194,19 @@ class HybridRAGRetriever:
         query = re.sub(r'[^a-z0-9\s]', '', query)
         # Remove stopwords
         query = ' '.join([word for word in query.split() if word not in self.stop_words])
-            # Generate answer with updated parameters
-            decoded_answer = answer_generator.generate_answer(top_k_chunks, user_query, max_length=max_length)
-            confidence = float(reranked_results[0]['score']) if reranked_results else 0.0
-            data = {
-                "Question": user_query,
-                "Method": "RAG",
-                "Answer": decoded_answer,
-                "Confidence": f"{confidence:.4f}",
-                "Time (s)": f"{inference_time:.2f}",
-                "ContextSnippet": top_k_chunks[0]['content'][:200] if top_k_chunks else "No context found."
-            }
-            return data
+        # Generate answer with updated parameters
+        decoded_answer = answer_generator.generate_answer(top_k_chunks, user_query, max_length=max_length)
+        confidence = float(reranked_results[0]['score']) if reranked_results else 0.0
+        data = {
+            "Question": user_query,
+            "Method": "RAG",
+            "Answer": decoded_answer,
+            "Confidence": f"{confidence:.4f}",
+            "Time (s)": f"{inference_time:.2f}",
+            "ContextSnippet": top_k_chunks[0]['content'][:200] if top_k_chunks else "No context found."
+        }
+        return data
+    
     def generate_query_embedding(self, query):
         if self.embedding_model is None:
             print("Embedding model is not loaded. Cannot generate query embedding.")
