@@ -24,7 +24,7 @@ from src.api import rag_server as rags
 MODE_FINE_TUNE_MODEL = "Use Fine-tuned Model"
 MODE_RAG = "Use RAG"
 
-RAG_SERVER_API_URI = f"http://localhost:8000/rag"
+#RAG_SERVER_API_URI = f"http://localhost:8000/rag"
 
 @st.cache_resource
 def load_model():
@@ -74,7 +74,7 @@ if st.button("Submit"):
                 "max_length": max_length
             }
             try:
-                with st.spinner("Calling Flask API..."):
+                with st.spinner("Calling RAG System API..."):
                      
                     data = rags.invoke_rag(user_input, max_length)
                     #resp = requests.post(RAG_SERVER_API_URI, json=payload, timeout=60)

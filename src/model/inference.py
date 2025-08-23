@@ -5,7 +5,7 @@ import time
 
 # -------- Config --------
 #MODEL_PATH = "./model/gpt2-finetuned-model"  # local directory where model is saved
-MODEL_PATH = "Anup77Jindal/gpt2-finetuned-model"
+MODEL_PATH = "Anup77Jindal/gpt2-finetuned-model-v0.1"
 
 
 def download_model():
