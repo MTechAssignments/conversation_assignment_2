@@ -1,9 +1,11 @@
-__import__('pysqlite3')
-import sys
-sys.modules['sqlite3'] = sys.modules.pop('pysqlite3')
+# Check if the app is running on Streamlit Community Cloud
+if os.getenv("STREAMLIT_SERVER_RUN_ON_SAVE", "false").lower() == "true":
+    __import__('pysqlite3')
+    import sys
+    sys.modules['sqlite3'] = sys.modules.pop('pysqlite3')
  
 import os
-
+import sys
 import streamlit as st
 import requests
 import pandas as pd
