@@ -1,5 +1,6 @@
 streamlit
-pysqlite3-binary
+# This line installs pysqlite3-binary only on Linux systems
+pysqlite3-binary ; sys_platform == "linux"
 sentence-transformers
 chromadb
 scikit-learn
