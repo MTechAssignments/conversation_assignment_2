@@ -94,7 +94,19 @@ with st.container(border=True):
                         st.subheader("RAG Response:")
                         try:
                             df = create_dataframe(data) 
-                            st.dataframe(df, use_container_width=True)
+                            st.dataframe(df, use_container_width=True,  column_config={
+                                "Question": st.column_config.TextColumn(
+                                    "Question",
+                                    help="A column for long text, configured to wrap content.",
+                                    width="medium"
+                                ),
+                                "Answer": st.column_config.TextColumn(
+                                    "Answer",
+                                    help="Another column for long text.",
+                                    width="medium"
+                                ),
+                            }
+                        )
                         except Exception as e:
                             st.info("Failed to render the response as table; showing JSON as-is.")
                             st.json(data)
@@ -110,7 +122,19 @@ with st.container(border=True):
                         st.subheader("Finetuned Response:")
                         
                         df = create_dataframe(data) 
-                        st.dataframe(df, use_container_width=True)
+                        st.dataframe(df, use_container_width=True,  column_config={
+                                "Question": st.column_config.TextColumn(
+                                    "Question",
+                                    help="A column for long text, configured to wrap content.",
+                                    width="medium"
+                                ),
+                                "Answer": st.column_config.TextColumn(
+                                    "Answer",
+                                    help="Another column for long text.",
+                                    width="medium"
+                                ),
+                            }
+                        )
                         #st.info(data)
                     except Exception as e:
                         st.error(f"Failed to generate response: {e}")
