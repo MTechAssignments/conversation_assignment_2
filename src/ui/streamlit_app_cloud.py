@@ -48,66 +48,69 @@ def create_dataframe(data):
     return df
 
 # -------- UI --------
-st.title("Invoke RAG or Fine-tuned Model for Financial Question Answers")
+st.header("Comparative Financial QA System: RAG vs Fine-Tuning")
 
-# Inputs
-user_input = st.text_area("Query", "Welcome to GE healthcare. Please enter your query.")
-max_length = 512
+with st.container(border=True): 
+    #st.info("GE Financial QnA Bot")
 
-mode = st.radio(
-    "Choose an Action",
-    [MODE_FINE_TUNE_MODEL, MODE_RAG ],
-    horizontal=True
-)
+    # Inputs
+    user_input = st.text_area(label="**GE Financial QnA Bot:**", value="Welcome to GE healthcare. Please enter your query.")
+    max_length = 512
 
-# Submit
-if st.button("Submit"):
-    if not user_input.strip():
-        st.error("This field is mandatory. Please enter a valid query.")
-    else:
-        st.success("You entered: " + user_input)
+    mode = st.radio(
+        label="**Choose an Action:**",
+        options=[MODE_FINE_TUNE_MODEL, MODE_RAG ],
+        horizontal=True
+    )
 
-        if mode == MODE_RAG:
-            # ---- Call Flask endpoint ----
-            payload = {
-                "query": user_input,
-                "max_length": max_length
-            }
-            try:
-                with st.spinner("Calling RAG System API..."):
-                     
-                    data = rags.invoke_rag(user_input, max_length)
-                    #resp = requests.post(RAG_SERVER_API_URI, json=payload, timeout=60)
-                #if not resp.ok:
-                if not data:
-                    #st.error(f"API error {resp.status_code}: {resp.text}")
-                    st.error(f"No response returned from RAG System")
-                else:
-                    #data = resp.json()
-                    #st.subheader("API Response (JSON)")
-                    st.json(data)
+    # Submit
+    if st.button("Submit"):
+        if not user_input.strip():
+            st.error("This field is mandatory. Please enter a valid query.")
+        else:
+            st.success("You entered: " + user_input)
 
-                    # ---- Show as table when possible ----
-                    st.subheader("RAG Response:")
+            if mode == MODE_RAG:
+                # ---- Call Flask endpoint ----
+                payload = {
+                    "query": user_input,
+                    "max_length": max_length
+                }
+                try:
+                    with st.spinner("Calling RAG System API..."):
+                        
+                        data = rags.invoke_rag(user_input, max_length)
+                        #resp = requests.post(RAG_SERVER_API_URI, json=payload, timeout=60)
+                    #if not resp.ok:
+                    if not data:
+                        #st.error(f"API error {resp.status_code}: {resp.text}")
+                        st.error(f"No response returned from RAG System")
+                    else:
+                        #data = resp.json()
+                        #st.subheader("API Response (JSON)")
+                        st.json(data)
+
+                        # ---- Show as table when possible ----
+                        st.subheader("RAG Response:")
+                        try:
+                            df = create_dataframe(data) 
+                            st.dataframe(df, use_container_width=True)
+                        except Exception as e:
+                            st.info("Failed to render the response as table; showing JSON as-is.")
+                            st.json(data)
+                except requests.exceptions.RequestException as e:
+                    st.error(f"Failed to reach Flask API: {e}")
+
+            elif mode == MODE_FINE_TUNE_MODEL:
+                # ---- Use the fine-tuned model ----
+                with st.spinner("Generating with fine-tuned model..."):
                     try:
+                        generate_answer = load_model()
+                        data = generate_answer(user_input, max_new_tokens=max_length)
+                        st.subheader("Finetuned Response:")
+                        
                         df = create_dataframe(data) 
                         st.dataframe(df, use_container_width=True)
+                        #st.info(data)
                     except Exception as e:
-                        st.info("Failed to render the response as table; showing JSON as-is.")
-                        st.json(data)
-            except requests.exceptions.RequestException as e:
-                st.error(f"Failed to reach Flask API: {e}")
-
-        elif mode == MODE_FINE_TUNE_MODEL:
-             # ---- Use the fine-tuned model ----
-              with st.spinner("Generating with fine-tuned model..."):
-                try:
-                    generate_answer = load_model()
-                    data = generate_answer(user_input, max_new_tokens=max_length)
-                    st.subheader("Finetuned Response:")
-                    
-                    df = create_dataframe(data) 
-                    st.dataframe(df, use_container_width=True)
-                    #st.info(data)
-                except Exception as e:
-                    st.error(f"Failed to generate response: {e}")
+                        st.error(f"Failed to generate response: {e}")
