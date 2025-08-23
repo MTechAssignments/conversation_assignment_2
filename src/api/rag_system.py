@@ -1,30 +1,232 @@
-from src.api.question_generator import FinancialReportProcessor
+"""
+Financial QA System - Standalone Python Module
+RAG-based approach for financial question answering.
+"""
+
+import warnings
+warnings.filterwarnings("ignore")
+
+import zipfile
+import os
+import pandas as pd
+import torch
+import time
+import re
+import math
+from bs4 import BeautifulSoup
 from sentence_transformers import SentenceTransformer, CrossEncoder
-import chromadb
+from transformers import GPT2LMHeadModel, GPT2Tokenizer
 from sklearn.feature_extraction.text import TfidfVectorizer
-import nltk
-import numpy as np
 from sklearn.metrics.pairwise import cosine_similarity
+import chromadb
+import numpy as np
+import nltk
+
+# Download required NLTK data
+try:
+    nltk.data.find('corpora/stopwords')
+except LookupError:
+    nltk.download('stopwords')
+
+class FinancialQASystem:
+    """
+    Financial QA System using RAG approach
+    """
+    
+    def __init__(self, data_path='./data/gehc-annual-report-2023-2024.zip'):
+        self.data_path = data_path
+        self.extracted_dir = './data_extracted'
+        self.plain_text_dir = './plain_text'
+        self.cleaned_texts = []
+        
+        # RAG components
+        self.indexer = None
+        self.retriever = None
+        self.answer_generator = None
+        
+        # Guardrail keywords
+        self.financial_keywords = [
+            'value', 'sales', 'income', 'cost', 'pbo', 'apbo', 'operations',
+            'financial', 'stockholders', 'change', 'difference', 'revenue', 
+            'products', 'comprehensive', 'continuing', 'service'
+        ]
+    
+    def setup_data(self):
+        """Extract and preprocess financial data"""
+        print("Setting up financial data...")
+        
+        # Create directories
+        os.makedirs(self.extracted_dir, exist_ok=True)
+        os.makedirs(self.plain_text_dir, exist_ok=True)
+        
+        # Extract ZIP file
+        with zipfile.ZipFile(self.data_path, 'r') as zip_ref:
+            zip_ref.extractall(self.extracted_dir)
+        
+        # Convert HTML to plain text
+        html_files = []
+        for root, _, files in os.walk(self.extracted_dir):
+            for file in files:
+                if file.endswith((".html", ".htm")):
+                    html_files.append(os.path.join(root, file))
+        
+        print(f"Found {len(html_files)} HTML files.")
+        
+        for html_file_path in html_files:
+            try:
+                # Read HTML file
+                try:
+                    with open(html_file_path, 'r', encoding='utf-8') as f:
+                        html_content = f.read()
+                except UnicodeDecodeError:
+                    with open(html_file_path, 'r', encoding='latin-1') as f:
+                        html_content = f.read()
+                
+                # Extract text using BeautifulSoup
+                soup = BeautifulSoup(html_content, 'html.parser')
+                plain_text = soup.get_text(separator='\n')
+                
+                # Save as plain text
+                relative_path = os.path.relpath(html_file_path, self.extracted_dir)
+                plain_text_file_path = os.path.join(self.plain_text_dir, relative_path + ".txt")
+                
+                os.makedirs(os.path.dirname(plain_text_file_path), exist_ok=True)
+                
+                with open(plain_text_file_path, 'w', encoding='utf-8') as f:
+                    f.write(plain_text)
+                    
+            except Exception as e:
+                print(f"Error processing {html_file_path}: {e}")
+        
+        # Load and clean text files
+        self._load_and_clean_texts()
+        print("Data setup complete!")
+    
+    def _load_and_clean_texts(self):
+        """Load and clean all plain text files"""
+        all_texts = []
+        
+        for root, _, files in os.walk(self.plain_text_dir):
+            for file in files:
+                if file.endswith('.txt'):
+                    file_path = os.path.join(root, file)
+                    try:
+                        with open(file_path, 'r', encoding='utf-8') as f:
+                            content = f.read()
+                            all_texts.append(content)
+                    except Exception as e:
+                        print(f"Error reading {file_path}: {e}")
+        
+        # Clean texts
+        self.cleaned_texts = []
+        for text in all_texts:
+            cleaned = self._clean_text(text)
+            if len(cleaned.strip()) > 100:  # Only keep substantial texts
+                self.cleaned_texts.append(cleaned)
+        
+        print(f"Loaded and cleaned {len(self.cleaned_texts)} documents.")
+    
+    def _clean_text(self, text):
+        """Clean individual text document"""
+        import re
+        
+        # Remove excessive whitespace
+        text = re.sub(r'\s+', ' ', text)
+        
+        # Remove special characters but keep financial terms
+        text = re.sub(r'[^\w\s\-\.\,\$\%\(\)]', ' ', text)
+        
+        # Remove very short lines
+        lines = text.split('\n')
+        lines = [line.strip() for line in lines if len(line.strip()) > 10]
+        
+        return '\n'.join(lines)
+    
+    def setup_rag_system(self):
+        """Initialize RAG system components"""
+        print("Setting up RAG system...")
+        
+        if not self.cleaned_texts:
+            raise ValueError("No cleaned texts available. Run setup_data() first.")
+        
+        # Initialize RAG indexer
+        self.indexer = RAGChunkIndexer(self.cleaned_texts)
+        
+        # Create chunks and embeddings
+        self.indexer.create_chunks()
+        self.indexer.embed_chunks()
+        self.indexer.build_dense_index()
+        self.indexer.build_sparse_index()
+        
+        # Initialize retriever
+        self.retriever = HybridRAGRetriever(
+            collection=self.indexer.collection,
+            embedding_model=self.indexer.embedding_model,
+            tfidf_vectorizer=self.indexer.tfidf_vectorizer,
+            tfidf_matrix=self.indexer.tfidf_matrix,
+            embedded_chunks=self.indexer.embedded_chunks
+        )
+        
+        # Load cross-encoder for reranking
+        self.retriever.load_cross_encoder()
+        
+        # Initialize answer generator
+        self.answer_generator = GPT2AnswerGenerator()
+        
+        print("RAG system setup complete!")
+    
+    def is_relevant(self, question):
+        """Check if question is relevant to financial domain"""
+        return any(keyword in question.lower() for keyword in self.financial_keywords)
+    
+    def get_rag_response(self, question):
+        """Get response using RAG approach"""
+        if not self.is_relevant(question):
+            return {
+                "Answer": "Not applicable",
+                "Confidence": "1.0000",
+                "Time (s)": "0.00",
+                "Method": "Guardrail (Irrelevant)"
+            }
+        
+        if not self.retriever or not self.answer_generator:
+            raise ValueError("RAG system not initialized. Run setup_rag_system() first.")
+        
+        start_time = time.time()
+        
+        # Retrieve and rerank chunks
+        reranked_results = self.retriever.retrieve(
+            question, n_broad_dense=5, n_broad_sparse=5, k=3, return_reranked=True
+        )
+        top_k_chunks = self.retriever.select_top_k_chunks(reranked_results, k=3)
+        
+        # Generate answer
+        answer = self.answer_generator.generate_answer(top_k_chunks, question, max_length=100)
+        
+        # Calculate confidence
+        if reranked_results and len(reranked_results) > 0:
+            top_score = float(reranked_results[0]['score'])
+            confidence = 1 / (1 + math.exp(-top_score))
+        else:
+            confidence = 0.0
+        
+        inference_time = time.time() - start_time
+        
+        return {
+            "Answer": answer or "No answer generated",
+            "Confidence": f"{confidence:.4f}",
+            "Time (s)": f"{inference_time:.2f}",
+            "Method": "RAG"
+        }
+    
+    def get_response(self, question):
+        """Get response using RAG approach - main method to call"""
+        return self.get_rag_response(question)
 
 
-# Usage:
-zip_file_path = './data/gehc-annual-report-2023-2024.zip'
-extracted_dir_path = './data/gehc_fin_extracted'
-plain_text_dir_path = './data/gehc_fin_plain_text'
-
-processor = FinancialReportProcessor(zip_file_path, extracted_dir_path, plain_text_dir_path)
-processor.extract_and_convert_html_to_text()
-processor.load_plain_text_files()
-processor.clean_all_texts()
-processor.segment_reports()
-processor.extract_financial_data()
-processor.generate_questions()
-processor.generate_answers()
 class RAGChunkIndexer:
-    """
-    Handles chunking, embedding, dense/sparse indexing for RAG pipeline.
-    """
-
+    """Handles chunking, embedding, and indexing for RAG"""
+    
     def __init__(self, cleaned_text_data):
         self.cleaned_text_data = cleaned_text_data
         self.chunk_sizes = [100, 400]
@@ -34,7 +236,7 @@ class RAGChunkIndexer:
         self.embedding_model = None
         self.tfidf_vectorizer = None
         self.tfidf_matrix = None
-
+    
     def chunk_text(self, text, chunk_size=100, overlap=20):
         words = text.split()
         chunks = []
@@ -42,7 +244,7 @@ class RAGChunkIndexer:
             chunk = " ".join(words[i:i + chunk_size])
             chunks.append(chunk)
         return chunks
-
+    
     def create_chunks(self):
         for doc_id, cleaned_text in enumerate(self.cleaned_text_data):
             for size in self.chunk_sizes:
@@ -59,114 +261,76 @@ class RAGChunkIndexer:
                             'chunk_size': size
                         }
                     })
+        
         for size, chunks in self.chunked_data.items():
             print(f"Generated {len(chunks)} chunks of size {size}.")
-            if len(chunks) > 0:
-                print(f"First chunk ({size}): {chunks[0]['content'][:200]}...")
-
+    
     def embed_chunks(self, model_name='all-MiniLM-L6-v2'):
         try:
             self.embedding_model = SentenceTransformer(model_name)
             print(f"Sentence embedding model '{model_name}' loaded successfully.")
         except Exception as e:
-            print(f"Error loading sentence embedding model: {e}")
-            print("Please ensure you have an active internet connection to download the model.")
-            self.embedding_model = None
+            print(f"Error loading embedding model: {e}")
             return
-
-        if self.embedding_model is not None:
-            for size, chunks in self.chunked_data.items():
-                print(f"Embedding {len(chunks)} chunks of size {size.split('_')[-1]}...")
-                chunks_content = [chunk['content'] for chunk in chunks]
-                try:
-                    embeddings = self.embedding_model.encode(chunks_content, show_progress_bar=True)
-                    self.embedded_chunks[size] = {
-                        'chunks': chunks,
-                        'embeddings': embeddings
-                    }
-                    print(f"Finished embedding chunks of size {size.split('_')[-1]}. Shape of embeddings: {embeddings.shape}")
-                except Exception as e:
-                    print(f"Error during embedding for chunk size {size.split('_')[-1]}: {e}")
-                    self.embedded_chunks[size] = None
-        else:
-            print("Embedding model not loaded, skipping embedding step.")
-
-    def build_dense_index(self, collection_name="financial_report_chunks"):
+        
+        for size, chunks in self.chunked_data.items():
+            print(f"Embedding {len(chunks)} chunks of size {size.split('_')[-1]}...")
+            chunks_content = [chunk['content'] for chunk in chunks]
+            try:
+                embeddings = self.embedding_model.encode(chunks_content, show_progress_bar=True)
+                self.embedded_chunks[size] = {
+                    'chunks': chunks,
+                    'embeddings': embeddings
+                }
+            except Exception as e:
+                print(f"Error during embedding: {e}")
+    
+    def build_dense_index(self, collection_name="financial_chunks"):
         try:
             client = chromadb.Client()
-            print("ChromaDB client initialized.")
-        except Exception as e:
-            print(f"Error initializing ChromaDB client: {e}")
-            return
-
-        try:
             self.collection = client.get_or_create_collection(name=collection_name)
-            print(f"ChromaDB collection '{collection_name}' created or retrieved.")
+            print(f"ChromaDB collection '{collection_name}' ready.")
         except Exception as e:
-            print(f"Error getting or creating ChromaDB collection: {e}")
-            self.collection = None
+            print(f"Error with ChromaDB: {e}")
             return
-
-        if self.collection is not None and self.embedded_chunks.get('chunks_100') and self.embedded_chunks['chunks_100']['embeddings'] is not None:
+        
+        if 'chunks_100' in self.embedded_chunks:
             chunks_to_add = self.embedded_chunks['chunks_100']['chunks']
             embeddings_to_add = self.embedded_chunks['chunks_100']['embeddings']
+            
             ids = [chunk['id'] for chunk in chunks_to_add]
             documents = [chunk['content'] for chunk in chunks_to_add]
             metadatas = [chunk['metadata'] for chunk in chunks_to_add]
-            batch_size = 100
-            for i in range(0, len(ids), batch_size):
-                batch_ids = ids[i:i + batch_size]
-                batch_documents = documents[i:i + batch_size]
-                batch_embeddings = embeddings_to_add[i:i + batch_size]
-                batch_metadatas = metadatas[i:i + batch_size]
-                try:
-                    self.collection.add(
-                        embeddings=batch_embeddings.tolist(),
-                        documents=batch_documents,
-                        metadatas=batch_metadatas,
-                        ids=batch_ids
-                    )
-                    print(f"Added batch {i//batch_size + 1} to ChromaDB.")
-                except Exception as e:
-                    print(f"Error adding batch {i//batch_size + 1} to ChromaDB: {e}")
-            print(f"Finished adding {len(ids)} chunks to ChromaDB collection '{collection_name}'.")
-        if self.collection is not None:
+            
             try:
-                count = self.collection.count()
-                print(f"Total items in ChromaDB collection '{collection_name}': {count}")
+                self.collection.add(
+                    embeddings=embeddings_to_add.tolist(),
+                    documents=documents,
+                    metadatas=metadatas,
+                    ids=ids
+                )
+                print(f"Added {len(ids)} chunks to ChromaDB.")
             except Exception as e:
-                print(f"Error getting count from ChromaDB collection: {e}")
-
+                print(f"Error adding to ChromaDB: {e}")
+    
     def build_sparse_index(self):
         if 'chunks_100' in self.embedded_chunks:
-            chunks_to_embed = self.embedded_chunks['chunks_100']['chunks']
-            chunks_content = [chunk['content'] for chunk in chunks_to_embed]
+            chunks = self.embedded_chunks['chunks_100']['chunks']
+            chunks_content = [chunk['content'] for chunk in chunks]
+            
             self.tfidf_vectorizer = TfidfVectorizer(stop_words='english', max_features=5000)
             try:
                 self.tfidf_matrix = self.tfidf_vectorizer.fit_transform(chunks_content)
-                print("TF-IDF vectorizer fitted and matrix created successfully.")
-                print(f"Shape of TF-IDF matrix: {self.tfidf_matrix.shape}")
+                print("TF-IDF index built successfully.")
             except Exception as e:
-                print(f"Error creating TF-IDF matrix: {e}")
-                self.tfidf_vectorizer = None
+                print(f"Error building TF-IDF index: {e}")
                 self.tfidf_matrix = None
-        else:
-            print("Chunks of size 100 not found in chunked_data. Cannot build TF-IDF index.")
-            self.tfidf_vectorizer = None
-            self.tfidf_matrix = None
+                self.tfidf_vectorizer = None
 
-# The tfidf_matrix now represents the sparse index of our chunks.
-
-"""### 2.3 Hybrid Retrieval Pipeline
-
-#### 2.3.1 Preprocess data clean
-"""
 
 class HybridRAGRetriever:
-    """
-    Implements a hybrid retrieval pipeline for RAG using dense, sparse, and cross-encoder reranking.
-    """
-
+    """Handles retrieval and reranking"""
+    
     def __init__(self, collection, embedding_model, tfidf_vectorizer, tfidf_matrix, embedded_chunks):
         self.collection = collection
         self.embedding_model = embedding_model
@@ -174,45 +338,32 @@ class HybridRAGRetriever:
         self.tfidf_matrix = tfidf_matrix
         self.embedded_chunks = embedded_chunks
         self.cross_encoder_model = None
-
+        
         # Prepare chunks for sparse retrieval
         self.chunks_to_embed = self.embedded_chunks['chunks_100']['chunks'] if 'chunks_100' in self.embedded_chunks else []
-
-        # Download stopwords if not already downloaded
-        try:
-            nltk.data.find('corpora/stopwords')
-        except LookupError:
-            nltk.download('stopwords')
+        
+        # Download stopwords
         from nltk.corpus import stopwords
         self.stop_words = set(stopwords.words('english'))
-
+    
+    def load_cross_encoder(self, model_name='cross-encoder/ms-marco-MiniLM-L-6-v2'):
+        try:
+            self.cross_encoder_model = CrossEncoder(model_name)
+            print(f"Cross-encoder model loaded.")
+        except Exception as e:
+            print(f"Error loading cross-encoder: {e}")
+    
     def preprocess_query(self, query):
         import re
-        # Convert to lowercase
         query = query.lower()
-        # Remove special characters and punctuation
         query = re.sub(r'[^a-z0-9\s]', '', query)
-        # Remove stopwords
         query = ' '.join([word for word in query.split() if word not in self.stop_words])
-        
         return query
     
-    def generate_query_embedding(self, query):
-        if self.embedding_model is None:
-            print("Embedding model is not loaded. Cannot generate query embedding.")
-            return None
-        try:
-            query_embedding = self.embedding_model.encode(query)
-            print("Query embedding generated successfully.")
-            return query_embedding
-        except Exception as e:
-            print(f"Error generating query embedding: {e}")
-            return None
-
     def dense_retrieve(self, query, n_results=5):
-        if self.collection is None or self.embedding_model is None:
-            print("ChromaDB collection or embedding model not loaded. Cannot perform dense retrieval.")
+        if not self.collection or not self.embedding_model:
             return []
+        
         try:
             query_embedding = self.embedding_model.encode([query]).tolist()
             results = self.collection.query(
@@ -220,201 +371,171 @@ class HybridRAGRetriever:
                 n_results=n_results,
                 include=['documents', 'metadatas']
             )
+            
             retrieved_chunks = []
-            if results and results['ids'] and results['documents'] and results['metadatas']:
+            if results and results['ids'] and results['documents']:
                 for i in range(len(results['ids'][0])):
                     retrieved_chunks.append({
                         'id': results['ids'][0][i],
                         'content': results['documents'][0][i],
                         'metadata': results['metadatas'][0][i]
                     })
-            print(f"Dense retrieval found {len(retrieved_chunks)} results.")
+            
             return retrieved_chunks
         except Exception as e:
-            print(f"Error during dense retrieval: {e}")
+            print(f"Dense retrieval error: {e}")
             return []
-
+    
     def sparse_retrieve_tfidf(self, query, n_results=5):
-        if self.tfidf_vectorizer is None or self.tfidf_matrix is None or not self.chunks_to_embed:
-            print("TF-IDF vectorizer, matrix, or chunks not available. Cannot perform sparse retrieval.")
+        if not self.tfidf_vectorizer or self.tfidf_matrix is None:
             return []
+        
         try:
             query_tfidf = self.tfidf_vectorizer.transform([query])
-            cosine_similarities = cosine_similarity(query_tfidf, self.tfidf_matrix).flatten()
-            top_n_indices = np.argpartition(cosine_similarities, -n_results)[-n_results:]
-            top_n_indices = top_n_indices[top_n_indices < len(self.chunks_to_embed)]
-            sorted_indices = top_n_indices[np.argsort(cosine_similarities[top_n_indices])][::-1]
+            similarities = cosine_similarity(query_tfidf, self.tfidf_matrix).flatten()
+            top_indices = np.argsort(similarities)[-n_results:][::-1]
+            
             retrieved_chunks = []
-            for idx in sorted_indices:
-                int_idx = int(idx)
-                retrieved_chunks.append({
-                    'id': self.chunks_to_embed[int_idx]['id'],
-                    'content': self.chunks_to_embed[int_idx]['content'],
-                    'metadata': self.chunks_to_embed[int_idx]['metadata']
-                })
-            print(f"Sparse retrieval found {len(retrieved_chunks)} results.")
+            for idx in top_indices:
+                if idx < len(self.chunks_to_embed):
+                    retrieved_chunks.append(self.chunks_to_embed[idx])
+            
             return retrieved_chunks
         except Exception as e:
-            print(f"Error during sparse retrieval: {e}")
+            print(f"Sparse retrieval error: {e}")
             return []
-
+    
     def combine_retrieval_results(self, dense_results, sparse_results):
         combined_chunks = {}
-        for chunk in dense_results:
-            combined_chunks[chunk['id']] = chunk
-        for chunk in sparse_results:
+        for chunk in dense_results + sparse_results:
             combined_chunks[chunk['id']] = chunk
         return list(combined_chunks.values())
-
-    def load_cross_encoder(self, model_name='cross-encoder/ms-marco-MiniLM-L-6-v2'):
-        try:
-            self.cross_encoder_model = CrossEncoder(model_name)
-            print(f"Cross-encoder model '{model_name}' loaded successfully.")
-        except Exception as e:
-            print(f"Error loading cross-encoder model: {e}")
-            self.cross_encoder_model = None
-            print("Please ensure you have an active internet connection to download the model.")
-
+    
     def rerank(self, query, combined_results):
-        if self.cross_encoder_model is None or not combined_results:
-            print("\nSkipping reranking due to missing cross-encoder model or combined results.")
-            return []
-        print("\nReranking combined results...")
-        sentence_pairs = [[query, chunk['content']] for chunk in combined_results]
+        if not self.cross_encoder_model or not combined_results:
+            return [{'chunk': chunk, 'score': 0.5} for chunk in combined_results]
+        
         try:
-            reranking_scores = self.cross_encoder_model.predict(sentence_pairs)
+            sentence_pairs = [[query, chunk['content']] for chunk in combined_results]
+            scores = self.cross_encoder_model.predict(sentence_pairs)
+            
             scored_results = []
             for i, chunk in enumerate(combined_results):
                 scored_results.append({
                     'chunk': chunk,
-                    'score': reranking_scores[i]
+                    'score': scores[i]
                 })
-            reranked_results = sorted(scored_results, key=lambda x: x['score'], reverse=True)
-            print(f"Finished reranking. Top score: {reranked_results[0]['score'] if reranked_results else 'N/A'}")
-            return reranked_results
+            
+            return sorted(scored_results, key=lambda x: x['score'], reverse=True)
         except Exception as e:
-            print(f"Error during reranking: {e}")
-            return []
-
+            print(f"Reranking error: {e}")
+            return [{'chunk': chunk, 'score': 0.5} for chunk in combined_results]
+    
     def select_top_k_chunks(self, reranked_results, k=3):
-        top_k_chunks = [item['chunk'] for item in reranked_results[:k]]
-        print(f"\nSelected top {k} chunks for response generation.")
-        for chunk in top_k_chunks:
-            print(f"- ID: {chunk['id']}, Content: {chunk['content'][:150]}...")
-        return top_k_chunks
-
-    def retrieve(self, user_query, n_broad_dense=10, n_broad_sparse=10, k=3, return_reranked=False):
-        # Preprocess the query
+        return [item['chunk'] for item in reranked_results[:k]]
+    
+    def retrieve(self, user_query, n_broad_dense=5, n_broad_sparse=5, k=3, return_reranked=False):
         preprocessed_query = self.preprocess_query(user_query)
-        # Broad retrieval
-        broad_dense_results = self.dense_retrieve(preprocessed_query, n_results=n_broad_dense)
-        broad_sparse_results = self.sparse_retrieve_tfidf(preprocessed_query, n_results=n_broad_sparse)
-        # Combine
-        combined_results = self.combine_retrieval_results(broad_dense_results, broad_sparse_results)
-        # Rerank
+        
+        dense_results = self.dense_retrieve(preprocessed_query, n_results=n_broad_dense)
+        sparse_results = self.sparse_retrieve_tfidf(preprocessed_query, n_results=n_broad_sparse)
+        combined_results = self.combine_retrieval_results(dense_results, sparse_results)
         reranked_results = self.rerank(preprocessed_query, combined_results)
         
         if return_reranked:
             return reranked_results
-            
-        # Select top-k
-        top_k_chunks = self.select_top_k_chunks(reranked_results, k=k)
-        return top_k_chunks
-
-    def get_user_response(self, user_query, answer_generator, n_broad_dense=5, n_broad_sparse=5, k=2, max_length=150):
-        """
-        Retrieve top-k relevant chunks for the user query and generate an answer.
-        Returns answer in the requested format with confidence, method, and inference time.
-        """
-        import time
-        start_time = time.time()
-
-        # Retrieve and rerank chunks
-        reranked_results = self.retrieve(user_query, n_broad_dense, n_broad_sparse, k, return_reranked=True)
-        top_k_chunks = self.select_top_k_chunks(reranked_results, k=k)
         
-        # Generate answer
-        decoded_answer = answer_generator.generate_answer(top_k_chunks, user_query, max_length=max_length)
-        inference_time = time.time() - start_time
+        return self.select_top_k_chunks(reranked_results, k=k)
 
-        # Calculate confidence from the top reranked score
-        confidence = float(reranked_results[0]['score']) if reranked_results else 0.0
-        
-        data = {
-            "Question": user_query,
-            "Method": "RAG",
-            "Answer": decoded_answer,
-            "Confidence": f"{confidence:.4f}",
-            "Time (s)": f"{inference_time:.2f}",
-            "ContextSnippet": top_k_chunks[0]['content'][:200] if top_k_chunks else "No context found."
-        }
-        return data
-
-# Step 5: Generate Answer using a small generative model (GPT-2 Small)
-# Install transformers library if not already installed
-# %pip install transformers
-
-from transformers import GPT2LMHeadModel, GPT2Tokenizer
-import zipfile
-import os
-from bs4 import BeautifulSoup
 
 class GPT2AnswerGenerator:
-    """
-    Loads GPT-2 Small model and tokenizer, and generates answers given top retrieved chunks and user query.
-    """
-
+    """Generates answers using GPT-2"""
+    
     def __init__(self, model_name="gpt2"):
         try:
             self.tokenizer = GPT2Tokenizer.from_pretrained(model_name)
             self.model = GPT2LMHeadModel.from_pretrained(model_name)
-            print(f"\nLoaded generative model: {model_name}")
+            
+            # Set padding token
+            if self.tokenizer.pad_token is None:
+                self.tokenizer.pad_token = self.tokenizer.eos_token
+                
+            print(f"GPT-2 model loaded: {model_name}")
         except Exception as e:
-            print(f"Error loading generative model {model_name}: {e}")
+            print(f"Error loading GPT-2: {e}")
             self.tokenizer = None
             self.model = None
-
+    
     def generate_answer(self, top_k_chunks, user_query, max_length=150):
-        """
-        Generate an answer using GPT-2 given the top retrieved chunks and user query.
-        Returns the generated answer as a string, or None if generation fails.
-        """
-        if self.tokenizer is not None and self.model is not None and top_k_chunks:
-            context = "\n".join([chunk['content'] for chunk in top_k_chunks])
-            prompt = f"Context:\n{context}\n\nQuestion: {user_query}\n\nAnswer:"
-            
-            # Ensure max_length for the answer doesn't exceed model's capacity
-            max_prompt_length = self.tokenizer.model_max_length - max_length
-            
-            encoded_prompt = self.tokenizer.encode(prompt, max_length=max_prompt_length, truncation=True, return_tensors="pt")
-            
-            try:
-                print("\nGenerating answer...")
-
-                output_sequences = self.model.generate(
-                    encoded_prompt,
-                    max_length=len(encoded_prompt[0]) + max_length, # Generate up to max_length new tokens
-                    num_return_sequences=1,
-                    no_repeat_ngram_size=2,
-                    early_stopping=True,
-                    temperature=0.7,
-                    top_k=50,
-                    top_p=0.95
-                )
-                generated_text = self.tokenizer.decode(output_sequences[0], skip_special_tokens=True)
-                answer_start = generated_text.find("Answer:")
-                if answer_start != -1:
-                    final_answer = generated_text[answer_start + len("Answer:"):].strip()
-                else:
-                    final_answer = generated_text.strip()
-                # Limit answer to 50 words
-                final_answer = ' '.join(final_answer.split()[:50])
-                print("\nGenerated Answer:")
-                print(final_answer)
-                return final_answer
-            except Exception as e:
-                print(f"Error during answer generation: {e}")
-                return None
-        else:
-            print("\nSkipping answer generation due to missing model, tokenizer, or chunks.")
+        if not self.tokenizer or not self.model or not top_k_chunks:
             return None
+        
+        context = "\n".join([chunk['content'] for chunk in top_k_chunks])
+        prompt = f"Context:\n{context}\n\nQuestion: {user_query}\n\nAnswer:"
+        
+        max_prompt_length = self.tokenizer.model_max_length - max_length
+        encoded_prompt = self.tokenizer.encode(prompt, max_length=max_prompt_length, truncation=True, return_tensors="pt")
+        
+        try:
+            output_sequences = self.model.generate(
+                encoded_prompt,
+                max_length=len(encoded_prompt[0]) + max_length,
+                num_return_sequences=1,
+                temperature=0.3,
+                top_k=40,
+                top_p=0.9,
+                pad_token_id=self.tokenizer.eos_token_id,
+                do_sample=True
+            )
+            
+            generated_text = self.tokenizer.decode(output_sequences[0], skip_special_tokens=True)
+            
+            # Extract answer
+            answer_start = generated_text.find("Answer:")
+            if answer_start != -1:
+                final_answer = generated_text[answer_start + len("Answer:"):].strip()
+            else:
+                prompt_length = len(self.tokenizer.decode(encoded_prompt[0], skip_special_tokens=True))
+                final_answer = generated_text[prompt_length:].strip()
+            
+            # Limit to 50 words
+            final_answer = ' '.join(final_answer.split()[:50])
+            return final_answer
+            
+        except Exception as e:
+            print(f"Generation error: {e}")
+            return None
+
+
+def main():
+    """Example of how to use the Financial QA System"""
+    
+    # Initialize system
+    qa_system = FinancialQASystem()
+    
+    # Setup data and models
+    print("Setting up data...")
+    qa_system.setup_data()
+    
+    print("Setting up RAG system...")
+    qa_system.setup_rag_system()
+    
+    # Test questions
+    test_questions = [
+        "What was the value of sales of products in 2023?",
+        "How much did net income change from 2023 to 2024?",
+        "What is the capital of France?"  # Irrelevant question
+    ]
+    
+    # Get responses
+    for question in test_questions:
+        result = qa_system.get_response(question)
+        print("\n" + "="*80)
+        print(f"Question: {question}")
+        print(f"Answer: {result['Answer']}")
+        print(f"Confidence: {result['Confidence']}, Time: {result['Time (s)']}s")
+        print(f"Method: {result['Method']}")
+
+
+if __name__ == "__main__":
+    main()

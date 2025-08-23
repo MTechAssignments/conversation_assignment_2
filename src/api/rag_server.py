@@ -35,44 +35,20 @@ class Query(BaseModel):
 
 
 # --- RAG System Initialization (runs once at server startup) ---
-from src.api.rag_system import RAGChunkIndexer, HybridRAGRetriever, GPT2AnswerGenerator, FinancialReportProcessor
-
-zip_file_path = './data/gehc-annual-report-2023-2024.zip'
-extracted_dir_path = './data/gehc_fin_extracted'
-plain_text_dir_path = './data/gehc_fin_plain_text'
-
-# Preprocess and build indexes (do this ONCE at startup)
-processor = FinancialReportProcessor(zip_file_path, extracted_dir_path, plain_text_dir_path)
-processor.extract_and_convert_html_to_text()
-processor.load_plain_text_files()
-processor.clean_all_texts()
-processor.segment_reports()
-processor.extract_financial_data()
-
-indexer = RAGChunkIndexer(processor.cleaned_text_data)
-indexer.create_chunks()
-indexer.embed_chunks()
-indexer.build_dense_index()
-indexer.build_sparse_index()
-
-retriever = HybridRAGRetriever(
-    indexer.collection,
-    indexer.embedding_model,
-    indexer.tfidf_vectorizer,
-    indexer.tfidf_matrix,
-    indexer.embedded_chunks
-)
-retriever.load_cross_encoder()
-answer_generator = GPT2AnswerGenerator()
+from src.api.rag_system import FinancialQASystem
+# Initialize and setup
+qa_system = FinancialQASystem()
+qa_system.setup_data()
+qa_system.setup_rag_system()
 
 
 # RAG pipeline objects are initialized ONCE above, at server startup.
 def invoke_rag(user_query, max_length=512):
     # Only use already-initialized retriever and answer_generator
-    response = retriever.get_user_response(user_query, answer_generator)
+    response = qa_system.get_response(user_query)
     # Only include the answer and metadata
     data = {
-        "Question": response["Question"],
+        "Question": user_query,  # Add the question from the input parameter
         "Method": response["Method"],
         "Answer": response["Answer"],
         "Confidence": response["Confidence"],
