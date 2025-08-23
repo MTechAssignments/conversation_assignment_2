@@ -1,6 +1,6 @@
-__import__('pysqlite3')
+#__import__('pysqlite3')
 import sys
-sys.modules['sqlite3'] = sys.modules.pop('pysqlite3')
+#sys.modules['sqlite3'] = sys.modules.pop('pysqlite3')
  
 import os
 
@@ -22,7 +22,7 @@ from src.api import rag_server as rags
 MODE_FINE_TUNE_MODEL = "Use Fine-tuned Model"
 MODE_RAG = "Use RAG"
 
-RAG_SERVER_API_URI = f"{os.getenv("RAG_SERVER_URL", "localhost:8000")}/rag" 
+RAG_SERVER_API_URI = f"http://localhost:8000/rag"
 
 @st.cache_resource
 def load_model():
