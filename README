@@ -1,3 +1,7 @@
+
+*******Streamlit Add URL ********
+https://conv-ai-assignment-2-grp-16-rag-finetune.streamlit.app
+
 **** RAG API***
 rag-server.py: Exposes API for RAG based question answering.
 URL:   http://localhost:5000/rag/
@@ -5,6 +9,19 @@ Input: payload = {
                 "query": user_input, "max_length": max_length
                  }
 
+Note: RAG's FAST API is not used in the streamlit cloud. The version deployed on streamlit cloud is a 2-tier architecture where UI is directly
+invoking the RAG backend and Finetuned model.
 
 ******* Fine Tune Model ******
 Down load the model from huggingface.
+URL: Anup77Jindal/gpt2-finetuned-model-v0.1
+
+
+************* Streamlit Deployment *****************
+Click on the Create App and Select the Git Repo
+Git Repo: MTechAssignments/conversation_assignment_2
+Python: 3.12.2
+Dependencies
+Class: streamlit_app_cloud
+streamlit run src/ui/streamlit_app_cloud.py
+App URL: conv-ai-assignment-2-grp-16-rag-finetune
